@@ -4,6 +4,9 @@ unsigned int count, toggle;
 void setup() {
   pinMode(PIN_LED, OUTPUT);
   Serial.begin(115200);
+  while(!Serial){
+    ; //wait for serial port to connect
+  }
   
   Serial.println("Hello World!");
   count = toggle = 0;
