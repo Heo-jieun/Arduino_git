@@ -11,9 +11,10 @@
 
 // global variables
 float timeout; // unit: us
-float dist_min, dist_max, dist_raw, dist_write, ledState; // unit: mm
+float dist_min, dist_max, dist_raw, dist_write, dist_past; // unit: mm
 unsigned long last_sampling_time; // unit: ms
 float scale; //  used for pulse duration to distance conversion
+int fadeValue = 255 ;
 
 void setup() {
 // initialize GPIO pins
@@ -29,6 +30,7 @@ void setup() {
   dist_raw = 0.0; // raw distance output from USS (unit: mm)
   dist_write = 0.0;
   scale = 0.001 * 0.5 * SND_VEL;
+  dist_past = 0.0;
 
 // initialize serial port
   Serial.begin(57600);
@@ -65,19 +67,40 @@ void loop() {
     
   }
 
- if( 150 <= dist_write && dist_write <= 250){
-     analogWrite(PIN_LED, 127);  
- } 
- else if( 100 <=dist_write  && dist_write < 150){
-      analogWrite(PIN_LED, 240); 
- } 
- else if( 250 <dist_write && dist_write  <= 300){
-       analogWrite(PIN_LED, 240); 
- }
- else if( dist_write == 200){
-      analogWrite(PIN_LED, 0); 
- }
-
+  if(100 <= dist_write && dist_write <=200){
+    for(int i = 100 ; i <= 200; i+=2){
+     if(dist_write == 200){
+         fadeValue == 0;
+     }
+     else if( dist_write == 100){
+         fadeValue ==255;
+     }
+     else if( i <= dist_write && dist_write < i+2){
+         fadeValue = int(255 - (i % 100)*2) ;
+     }
+     else{
+       continue ;
+     }
+   }
+   analogWrite(PIN_LED, fadeValue);
+  }
+  else{
+    for(int j = 200 ;  j <= 300 ; j +=2){
+     if(dist_write == 200){
+         fadeValue == 0;
+     }
+      else if( dist_write == 300){
+         fadeValue ==255;
+     }
+     else if( j <= dist_write && dist_write < j+2){
+         fadeValue = int((j%200)*2.5);
+     }
+     else{
+      continue ;
+     }
+    }
+    analogWrite(PIN_LED, fadeValue);
+  } 
   
 // update last sampling time
   last_sampling_time += INTERVAL;
@@ -104,4 +127,3 @@ float USS_measure(int TRIG, int ECHO)
   //           = 100 * 173 milli*meter = 17,300 mm = 17.3m
   // pulseIn() returns microseconds.
 }
-
